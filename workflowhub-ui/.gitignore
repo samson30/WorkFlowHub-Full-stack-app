@@ -53,14 +53,4 @@ Desktop.ini
 *.tmp
 *.temp
 
-# .NET
-bin/
-obj/
-
-# Node
-node_modules/
-
-# General
-.vscode/
-.env
 
