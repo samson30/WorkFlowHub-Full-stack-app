@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using WorkFlowHub.Api.Data;
+using WorkFlowHub.Api.DTOs.Common;
 using WorkFlowHub.Api.Enums;
 using WorkFlowHub.Api.Models;
 
@@ -14,12 +15,26 @@ namespace WorkFlowHub.Api.Services
             _db = db;
         }
 
-        public async Task<List<TaskItem>> GetTasksForProjectAsync(int projectId, int userId)
+        public async Task<PagedResult<TaskItem>> GetTasksForProjectAsync(int projectId, int userId, PaginationParams paging)
         {
-            return await _db.Tasks
+            var query = _db.Tasks
                 .Include(t => t.Project)
-                .Where(t => t.ProjectId == projectId && t.Project.UserId == userId)
+                .Where(t => t.ProjectId == projectId && t.Project.UserId == userId);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Skip((paging.Page - 1) * paging.PageSize)
+                .Take(paging.PageSize)
                 .ToListAsync();
+
+            return new PagedResult<TaskItem>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = paging.Page,
+                PageSize = paging.PageSize
+            };
         }
 
         public async Task<TaskItem?> CreateTaskAsync(TaskItem task, int userId)

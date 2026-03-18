@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using WorkFlowHub.Api.DTOs;
+using WorkFlowHub.Api.DTOs.Common;
 using WorkFlowHub.Api.DTOs.Projects;
 using WorkFlowHub.Api.Models;
 using WorkFlowHub.Api.Services;
@@ -27,21 +28,25 @@ namespace WorkFlowHub.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetMyProjects()
+        public async Task<IActionResult> GetMyProjects([FromQuery] PaginationParams paging)
         {
             int userId = GetUserId();
-            var projects = await _projectService.GetProjectsForUserAsync(userId);
+            var result = await _projectService.GetProjectsForUserAsync(userId, paging);
 
-            var response = projects.Select(p => new ProjectResponseDto
+            return Ok(new PagedResult<ProjectResponseDto>
             {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description??"",
-                Status = p.Status,
-                CreatedAt = p.CreatedAt
+                Items = result.Items.Select(p => new ProjectResponseDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description ?? "",
+                    Status = p.Status,
+                    CreatedAt = p.CreatedAt
+                }).ToList(),
+                TotalCount = result.TotalCount,
+                Page = result.Page,
+                PageSize = result.PageSize
             });
-
-            return Ok(response);
         }
 
 
