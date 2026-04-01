@@ -1,0 +1,42 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.swp
+*.lock
+project.lock.json
+
+## EF Migrations (generated — keep under source control if desired)
+# Uncomment to ignore auto-generated migration snapshots:
+# **/Migrations/
+
+## Environment secrets — NEVER commit these
+.env
+*.env.local
+appsettings.Production.json
+
+## Test results & coverage
+TestResults/
+coverage/
+*.trx
+*.coveragexml
+
+## Docker
+.dockerignore
+
+## Node (frontend)
+frontend/node_modules/
+frontend/build/
+frontend/.env.local
+frontend/.env.production
+
+## OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+## IDE
+.idea/
+*.code-workspace
