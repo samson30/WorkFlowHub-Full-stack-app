@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/WorkFlowHub.API/WorkFlowHub.API.csproj" />
+    <Project Path="src/WorkFlowHub.Core/WorkFlowHub.Core.csproj" />
+    <Project Path="src/WorkFlowHub.Functions/WorkFlowHub.Functions.csproj" />
+    <Project Path="src/WorkFlowHub.Infrastructure/WorkFlowHub.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/WorkFlowHub.IntegrationTests/WorkFlowHub.IntegrationTests.csproj" />
+    <Project Path="tests/WorkFlowHub.UnitTests/WorkFlowHub.UnitTests.csproj" />
+  </Folder>
+</Solution>
