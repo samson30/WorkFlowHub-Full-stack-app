@@ -21,7 +21,7 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-if (!app.Environment.IsProduction())
+if (!app.Environment.IsProduction() && !app.Environment.IsEnvironment("Testing"))
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
