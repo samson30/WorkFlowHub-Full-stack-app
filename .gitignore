@@ -16,6 +16,7 @@ project.lock.json
 .env
 *.env.local
 appsettings.Production.json
+local.settings.json
 
 ## Test results & coverage
 TestResults/
@@ -40,3 +41,4 @@ desktop.ini
 ## IDE
 .idea/
 *.code-workspace
+/.claude
