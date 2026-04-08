@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import api from '../api/axios'
 import Navbar from '../components/Navbar'
 
@@ -14,6 +14,7 @@ const FileUploadPage: React.FC = () => {
   const [uploading, setUploading] = useState(false)
   const [uploaded, setUploaded] = useState<FileRecord | null>(null)
   const [error, setError] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFile(e.target.files?.[0] ?? null)
@@ -36,7 +37,7 @@ const FileUploadPage: React.FC = () => {
       })
       setUploaded(data)
       setFile(null)
-      ;(e.target as HTMLFormElement).reset()
+      if (inputRef.current) inputRef.current.value = ''
     } catch {
       setError('Upload failed. Please try again.')
     } finally {
@@ -63,23 +64,27 @@ const FileUploadPage: React.FC = () => {
           <form onSubmit={handleUpload}>
             <div className="form-group">
               <label>Select file <span style={{ color: 'var(--text-subtle)', fontWeight: 400 }}>(max 50 MB)</span></label>
-              <div className={`upload-zone-wrapper`}>
-                <div className={`upload-zone${file ? ' has-file' : ''}`}>
-                  <div className="upload-zone-icon">{file ? '📄' : '☁️'}</div>
-                  {file ? (
-                    <>
-                      <p style={{ fontWeight: 600, color: 'var(--primary)' }}>{file.name}</p>
-                      <small>{(file.size / 1024 / 1024).toFixed(2)} MB — click to change</small>
-                    </>
-                  ) : (
-                    <>
-                      <p>Drag & drop or click to browse</p>
-                      <small>Any file type up to 50 MB</small>
-                    </>
-                  )}
-                  <input type="file" onChange={handleFileChange} />
-                </div>
-              </div>
+              <label className={`upload-zone${file ? ' has-file' : ''}`} htmlFor="file-input">
+                <div className="upload-zone-icon">{file ? '📄' : '☁️'}</div>
+                {file ? (
+                  <>
+                    <p style={{ fontWeight: 600, color: 'var(--primary)' }}>{file.name}</p>
+                    <small>{(file.size / 1024 / 1024).toFixed(2)} MB — click to change</small>
+                  </>
+                ) : (
+                  <>
+                    <p>Click to browse files</p>
+                    <small>Any file type up to 50 MB</small>
+                  </>
+                )}
+              </label>
+              <input
+                id="file-input"
+                ref={inputRef}
+                type="file"
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+              />
             </div>
 
             <button
