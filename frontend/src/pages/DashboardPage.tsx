@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../api/axios'
 import Navbar from '../components/Navbar'
+import { useAuth } from '../context/AuthContext'
 
 interface Project {
   id: string
@@ -17,12 +18,13 @@ interface PagedResult {
 }
 
 const DashboardPage: React.FC = () => {
+  const { user } = useAuth()
   const [projects, setProjects] = useState<Project[]>([])
   const [totalCount, setTotalCount] = useState(0)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    api.get<PagedResult>('/projects?pageNumber=1&pageSize=5')
+    api.get<PagedResult>('/projects?pageNumber=1&pageSize=6')
       .then(({ data }) => {
         setProjects(data.items)
         setTotalCount(data.totalCount)
@@ -30,12 +32,21 @@ const DashboardPage: React.FC = () => {
       .finally(() => setLoading(false))
   }, [])
 
+  const totalTasks = projects.reduce((sum, p) => sum + (p.taskCount ?? 0), 0)
+  const firstName = user?.email?.split('@')[0] ?? 'there'
+
   return (
     <>
       <Navbar />
       <main className="container">
-        <div className="page-header">
-          <h2>Dashboard</h2>
+        <div className="dashboard-hero">
+          <div>
+            <h2>Welcome back, {firstName} 👋</h2>
+            <p>Here's an overview of your workspace</p>
+          </div>
+          <Link to="/projects" className="btn btn-secondary btn-sm">
+            View all projects →
+          </Link>
         </div>
 
         <div className="stats-grid">
@@ -43,19 +54,25 @@ const DashboardPage: React.FC = () => {
             <span className="stat-value">{totalCount}</span>
             <span className="stat-label">Total Projects</span>
           </div>
+          <div className="stat-card">
+            <span className="stat-value">{totalTasks}</span>
+            <span className="stat-label">Tasks (recent)</span>
+          </div>
         </div>
 
         <div className="section-header">
           <h3>Recent Projects</h3>
-          <Link to="/projects" className="btn btn-primary btn-sm">View all</Link>
+          <Link to="/projects" className="btn btn-primary btn-sm">+ New Project</Link>
         </div>
 
         {loading ? (
-          <p className="loading">Loading...</p>
+          <div className="loading"><div className="spinner" />Loading projects...</div>
         ) : projects.length === 0 ? (
           <div className="empty-state">
-            <p>No projects yet.</p>
-            <Link to="/projects" className="btn btn-primary">Create your first project</Link>
+            <div className="empty-state-icon">📋</div>
+            <p>No projects yet</p>
+            <small>Create your first project to get started</small>
+            <Link to="/projects" className="btn btn-primary">Create a project</Link>
           </div>
         ) : (
           <div className="project-grid">

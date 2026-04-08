@@ -15,6 +15,12 @@ const FileUploadPage: React.FC = () => {
   const [uploaded, setUploaded] = useState<FileRecord | null>(null)
   const [error, setError] = useState('')
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFile(e.target.files?.[0] ?? null)
+    setUploaded(null)
+    setError('')
+  }
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!file) return
@@ -43,31 +49,55 @@ const FileUploadPage: React.FC = () => {
       <Navbar />
       <main className="container">
         <div className="page-header">
-          <h2>File Upload</h2>
+          <div>
+            <h2>File Upload</h2>
+            <p className="text-muted" style={{ marginTop: 4 }}>Files are stored securely in Azure Blob Storage</p>
+          </div>
         </div>
 
         <div className="card form-card">
           <h3>Upload a file</h3>
-          <p className="text-muted">Files are stored in Azure Blob Storage. Max size: 50MB.</p>
+
           {error && <div className="alert alert-error">{error}</div>}
+
           <form onSubmit={handleUpload}>
             <div className="form-group">
-              <label>Select file</label>
-              <input
-                type="file"
-                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                required
-              />
+              <label>Select file <span style={{ color: 'var(--text-subtle)', fontWeight: 400 }}>(max 50 MB)</span></label>
+              <div className={`upload-zone-wrapper`}>
+                <div className={`upload-zone${file ? ' has-file' : ''}`}>
+                  <div className="upload-zone-icon">{file ? '📄' : '☁️'}</div>
+                  {file ? (
+                    <>
+                      <p style={{ fontWeight: 600, color: 'var(--primary)' }}>{file.name}</p>
+                      <small>{(file.size / 1024 / 1024).toFixed(2)} MB — click to change</small>
+                    </>
+                  ) : (
+                    <>
+                      <p>Drag & drop or click to browse</p>
+                      <small>Any file type up to 50 MB</small>
+                    </>
+                  )}
+                  <input type="file" onChange={handleFileChange} />
+                </div>
+              </div>
             </div>
-            <button type="submit" className="btn btn-primary" disabled={uploading || !file}>
-              {uploading ? 'Uploading...' : 'Upload'}
+
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={uploading || !file}
+              style={{ marginTop: 8 }}
+            >
+              {uploading ? 'Uploading...' : 'Upload file'}
             </button>
           </form>
         </div>
 
         {uploaded && (
           <div className="card upload-result">
-            <h3>Upload successful</h3>
+            <div className="alert alert-success" style={{ marginBottom: 16 }}>
+              File uploaded successfully!
+            </div>
             <table className="detail-table">
               <tbody>
                 <tr><th>File name</th><td>{uploaded.fileName}</td></tr>

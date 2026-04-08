@@ -55,7 +55,7 @@ const ProjectsPage: React.FC = () => {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this project?')) return
+    if (!confirm('Delete this project and all its tasks?')) return
     await api.delete(`/projects/${id}`)
     fetchProjects(page)
   }
@@ -65,9 +65,12 @@ const ProjectsPage: React.FC = () => {
       <Navbar />
       <main className="container">
         <div className="page-header">
-          <h2>Projects</h2>
+          <div>
+            <h2>Projects</h2>
+            {paged && <p className="text-muted" style={{ marginTop: 4 }}>{paged.totalCount} project{paged.totalCount !== 1 ? 's' : ''} total</p>}
+          </div>
           <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-            {showForm ? 'Cancel' : 'New Project'}
+            {showForm ? '✕ Cancel' : '+ New Project'}
           </button>
         </div>
 
@@ -75,12 +78,25 @@ const ProjectsPage: React.FC = () => {
           <form className="card form-card" onSubmit={handleCreate}>
             <h3>New Project</h3>
             <div className="form-group">
-              <label>Name</label>
-              <input value={name} onChange={(e) => setName(e.target.value)} required maxLength={200} />
+              <label>Project name</label>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Marketing Website"
+                required
+                maxLength={200}
+                autoFocus
+              />
             </div>
             <div className="form-group">
-              <label>Description</label>
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={2000} rows={3} />
+              <label>Description <span style={{ color: 'var(--text-subtle)', fontWeight: 400 }}>(optional)</span></label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="What is this project about?"
+                maxLength={2000}
+                rows={3}
+              />
             </div>
             <button type="submit" className="btn btn-primary" disabled={saving}>
               {saving ? 'Creating...' : 'Create Project'}
@@ -89,9 +105,13 @@ const ProjectsPage: React.FC = () => {
         )}
 
         {loading ? (
-          <p className="loading">Loading...</p>
+          <div className="loading"><div className="spinner" />Loading projects...</div>
         ) : projects.length === 0 ? (
-          <div className="empty-state"><p>No projects found.</p></div>
+          <div className="empty-state">
+            <div className="empty-state-icon">📋</div>
+            <p>No projects yet</p>
+            <small>Click "New Project" to create your first one</small>
+          </div>
         ) : (
           <>
             <div className="project-grid">
@@ -101,10 +121,10 @@ const ProjectsPage: React.FC = () => {
                   <p className="project-desc">{p.description || 'No description'}</p>
                   <div className="project-meta">
                     <span>{p.taskCount} task{p.taskCount !== 1 ? 's' : ''}</span>
-                    <span>{new Date(p.updatedAt).toLocaleDateString()}</span>
+                    <span>Updated {new Date(p.updatedAt).toLocaleDateString()}</span>
                   </div>
                   <div className="card-actions">
-                    <Link to={`/projects/${p.id}`} className="btn btn-secondary btn-sm">Open</Link>
+                    <Link to={`/projects/${p.id}`} className="btn btn-secondary btn-sm">Open →</Link>
                     <button className="btn btn-danger btn-sm" onClick={() => handleDelete(p.id)}>Delete</button>
                   </div>
                 </div>
@@ -113,9 +133,9 @@ const ProjectsPage: React.FC = () => {
 
             {paged && paged.totalPages > 1 && (
               <div className="pagination">
-                <button className="btn btn-secondary btn-sm" disabled={page === 1} onClick={() => setPage(page - 1)}>Prev</button>
+                <button className="btn btn-secondary btn-sm" disabled={page === 1} onClick={() => setPage(page - 1)}>← Prev</button>
                 <span>Page {paged.pageNumber} of {paged.totalPages}</span>
-                <button className="btn btn-secondary btn-sm" disabled={page === paged.totalPages} onClick={() => setPage(page + 1)}>Next</button>
+                <button className="btn btn-secondary btn-sm" disabled={page === paged.totalPages} onClick={() => setPage(page + 1)}>Next →</button>
               </div>
             )}
           </>

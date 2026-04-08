@@ -37,6 +37,17 @@ const statusBadge: Record<string, string> = {
   Cancelled: 'badge-danger',
 }
 
+const statusLabel: Record<string, string> = {
+  InProgress: 'In Progress',
+}
+
+const priorityClass: Record<string, string> = {
+  Low: 'low',
+  Medium: 'medium',
+  High: 'high',
+  Critical: 'critical',
+}
+
 const ProjectDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -106,14 +117,14 @@ const ProjectDetailPage: React.FC = () => {
       <main className="container">
         <div className="page-header">
           <div>
-            <button className="btn btn-secondary btn-sm" onClick={() => navigate('/projects')}>
-              ← Back
+            <button className="btn btn-secondary btn-sm" style={{ marginBottom: 10 }} onClick={() => navigate('/projects')}>
+              ← Back to Projects
             </button>
             <h2>{project?.name ?? 'Loading...'}</h2>
-            {project?.description && <p className="text-muted">{project.description}</p>}
+            {project?.description && <p className="text-muted" style={{ marginTop: 4 }}>{project.description}</p>}
           </div>
           <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-            {showForm ? 'Cancel' : 'New Task'}
+            {showForm ? '✕ Cancel' : '+ New Task'}
           </button>
         </div>
 
@@ -121,12 +132,25 @@ const ProjectDetailPage: React.FC = () => {
           <form className="card form-card" onSubmit={handleCreateTask}>
             <h3>New Task</h3>
             <div className="form-group">
-              <label>Title</label>
-              <input value={title} onChange={(e) => setTitle(e.target.value)} required maxLength={300} />
+              <label>Task title</label>
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g. Design landing page"
+                required
+                maxLength={300}
+                autoFocus
+              />
             </div>
             <div className="form-group">
-              <label>Description</label>
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} maxLength={2000} />
+              <label>Description <span style={{ color: 'var(--text-subtle)', fontWeight: 400 }}>(optional)</span></label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Add more detail about this task..."
+                rows={3}
+                maxLength={2000}
+              />
             </div>
             <div className="form-row">
               <div className="form-group">
@@ -147,22 +171,33 @@ const ProjectDetailPage: React.FC = () => {
         )}
 
         {loading ? (
-          <p className="loading">Loading tasks...</p>
+          <div className="loading"><div className="spinner" />Loading tasks...</div>
         ) : tasks.length === 0 ? (
-          <div className="empty-state"><p>No tasks yet.</p></div>
+          <div className="empty-state">
+            <div className="empty-state-icon">✅</div>
+            <p>No tasks yet</p>
+            <small>Click "New Task" to add the first task to this project</small>
+          </div>
         ) : (
           <>
+            {paged && (
+              <p className="text-muted" style={{ marginBottom: 14 }}>
+                {paged.totalCount} task{paged.totalCount !== 1 ? 's' : ''}
+              </p>
+            )}
             <div className="task-list">
               {tasks.map((t) => (
-                <div key={t.id} className="task-card">
+                <div key={t.id} className={`task-card priority-${priorityClass[t.priority] ?? 'medium'}`}>
                   <div className="task-header">
                     <h4>{t.title}</h4>
-                    <span className={`badge ${statusBadge[t.status] ?? 'badge-default'}`}>{t.status}</span>
+                    <span className={`badge ${statusBadge[t.status] ?? 'badge-default'}`}>
+                      {statusLabel[t.status] ?? t.status}
+                    </span>
                   </div>
                   {t.description && <p className="task-desc">{t.description}</p>}
                   <div className="task-meta">
-                    <span className="priority">Priority: {t.priority}</span>
-                    {t.dueDate && <span>Due: {new Date(t.dueDate).toLocaleDateString()}</span>}
+                    <span className={`priority-badge ${priorityClass[t.priority] ?? 'medium'}`}>{t.priority}</span>
+                    {t.dueDate && <span>Due {new Date(t.dueDate).toLocaleDateString()}</span>}
                     {t.assignedUserEmail && <span>Assigned: {t.assignedUserEmail}</span>}
                   </div>
                   <div className="card-actions">
@@ -171,7 +206,7 @@ const ProjectDetailPage: React.FC = () => {
                       onChange={(e) => handleStatusChange(t.id, e.target.value)}
                       className="select-sm"
                     >
-                      {STATUS_OPTIONS.map((s) => <option key={s}>{s}</option>)}
+                      {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{statusLabel[s] ?? s}</option>)}
                     </select>
                     <button className="btn btn-danger btn-sm" onClick={() => handleDeleteTask(t.id)}>Delete</button>
                   </div>
@@ -181,9 +216,9 @@ const ProjectDetailPage: React.FC = () => {
 
             {paged && paged.totalPages > 1 && (
               <div className="pagination">
-                <button className="btn btn-secondary btn-sm" disabled={page === 1} onClick={() => setPage(page - 1)}>Prev</button>
+                <button className="btn btn-secondary btn-sm" disabled={page === 1} onClick={() => setPage(page - 1)}>← Prev</button>
                 <span>Page {paged.pageNumber} of {paged.totalPages}</span>
-                <button className="btn btn-secondary btn-sm" disabled={page === paged.totalPages} onClick={() => setPage(page + 1)}>Next</button>
+                <button className="btn btn-secondary btn-sm" disabled={page === paged.totalPages} onClick={() => setPage(page + 1)}>Next →</button>
               </div>
             )}
           </>

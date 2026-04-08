@@ -26,37 +26,63 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="auth-page">
-      <div className="auth-card">
+      <div className="auth-left">
         <h1>WorkFlowHub</h1>
-        <h2>Sign in</h2>
-        {error && <div className="alert alert-error">{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoFocus
-            />
+        <p>A modern project and task management platform built for teams that move fast.</p>
+        <div className="auth-features">
+          <div className="auth-feature">
+            <div className="auth-feature-icon">📋</div>
+            <span>Organise projects and track progress</span>
           </div>
-          <div className="form-group">
-            <label>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+          <div className="auth-feature">
+            <div className="auth-feature-icon">✅</div>
+            <span>Manage tasks with priorities and due dates</span>
           </div>
-          <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign in'}
-          </button>
-        </form>
-        <p className="auth-footer">
-          No account? <Link to="/register">Register</Link>
-        </p>
+          <div className="auth-feature">
+            <div className="auth-feature-icon">📁</div>
+            <span>Upload and share files with your team</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="auth-right">
+        <div className="auth-card">
+          <h2 className="auth-card-title">Welcome back</h2>
+          <p className="auth-card-subtitle">Sign in to your account to continue</p>
+
+          {error && <div className="alert alert-error">{error}</div>}
+
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>Email address</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+                autoFocus
+              />
+            </div>
+            <div className="form-group">
+              <label>Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign in'}
+            </button>
+          </form>
+
+          <p className="auth-footer">
+            Don't have an account? <Link to="/register">Create one</Link>
+          </p>
+        </div>
       </div>
     </div>
   )
