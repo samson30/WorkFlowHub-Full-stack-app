@@ -1,4 +1,5 @@
-import { Link, useNavigate } from 'react-router-dom'
+import React from 'react'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 const Navbar: React.FC = () => {
@@ -13,17 +14,21 @@ const Navbar: React.FC = () => {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <Link to="/dashboard">WorkFlowHub</Link>
+        <NavLink to="/dashboard">WorkFlowHub</NavLink>
       </div>
       <div className="navbar-links">
-        <Link to="/projects">Projects</Link>
-        <Link to="/files">Files</Link>
+        <NavLink to="/projects" className={({ isActive }) => isActive ? 'active' : ''}>
+          Projects
+        </NavLink>
+        <NavLink to="/files" className={({ isActive }) => isActive ? 'active' : ''}>
+          Files
+        </NavLink>
       </div>
       <div className="navbar-user">
         <span className="user-email">{user?.email}</span>
         <span className="user-role">{user?.role}</span>
         <button onClick={handleLogout} className="btn btn-secondary btn-sm">
-          Logout
+          Sign out
         </button>
       </div>
     </nav>
