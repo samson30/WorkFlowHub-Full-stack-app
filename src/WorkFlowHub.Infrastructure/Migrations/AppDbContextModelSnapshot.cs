@@ -191,7 +191,7 @@ namespace WorkFlowHub.Infrastructure.Migrations
                     b.HasOne("WorkFlowHub.Core.Models.User", "AssignedUser")
                         .WithMany("AssignedTasks")
                         .HasForeignKey("AssignedUserId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("WorkFlowHub.Core.Models.Project", "Project")
                         .WithMany("Tasks")

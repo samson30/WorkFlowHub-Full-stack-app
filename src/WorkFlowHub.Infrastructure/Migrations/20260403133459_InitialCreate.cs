@@ -99,7 +99,7 @@ namespace WorkFlowHub.Infrastructure.Migrations
                         column: x => x.AssignedUserId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateIndex(
