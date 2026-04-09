@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../api/axios'
 import Navbar from '../components/Navbar'
+import ConfirmDialog from '../components/ConfirmDialog'
+import { useToast } from '../context/ToastContext'
 
 interface Project {
   id: string
@@ -19,6 +21,7 @@ interface PagedResult {
 }
 
 const ProjectsPage: React.FC = () => {
+  const { toast } = useToast()
   const [projects, setProjects] = useState<Project[]>([])
   const [paged, setPaged] = useState<Omit<PagedResult, 'items'> | null>(null)
   const [page, setPage] = useState(1)
@@ -27,6 +30,7 @@ const ProjectsPage: React.FC = () => {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [saving, setSaving] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
 
   const fetchProjects = (p: number) => {
     setLoading(true)
@@ -35,6 +39,7 @@ const ProjectsPage: React.FC = () => {
         setProjects(data.items)
         setPaged({ totalCount: data.totalCount, totalPages: data.totalPages, pageNumber: data.pageNumber })
       })
+      .catch(() => toast('Failed to load projects', 'error'))
       .finally(() => setLoading(false))
   }
 
@@ -49,15 +54,24 @@ const ProjectsPage: React.FC = () => {
       setDescription('')
       setShowForm(false)
       fetchProjects(1)
+      toast('Project created')
+    } catch {
+      toast('Failed to create project', 'error')
     } finally {
       setSaving(false)
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this project and all its tasks?')) return
-    await api.delete(`/projects/${id}`)
-    fetchProjects(page)
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    try {
+      await api.delete(`/projects/${deleteTarget}`)
+      setDeleteTarget(null)
+      fetchProjects(page)
+      toast('Project deleted')
+    } catch {
+      toast('Failed to delete project', 'error')
+    }
   }
 
   return (
@@ -125,7 +139,7 @@ const ProjectsPage: React.FC = () => {
                   </div>
                   <div className="card-actions">
                     <Link to={`/projects/${p.id}`} className="btn btn-secondary btn-sm">Open →</Link>
-                    <button className="btn btn-danger btn-sm" onClick={() => handleDelete(p.id)}>Delete</button>
+                    <button className="btn btn-danger btn-sm" onClick={() => setDeleteTarget(p.id)}>Delete</button>
                   </div>
                 </div>
               ))}
@@ -141,6 +155,16 @@ const ProjectsPage: React.FC = () => {
           </>
         )}
       </main>
+
+      {deleteTarget && (
+        <ConfirmDialog
+          message="Delete this project and all its tasks? This cannot be undone."
+          confirmLabel="Delete"
+          danger
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </>
   )
 }

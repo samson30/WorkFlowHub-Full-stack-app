@@ -11,6 +11,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
     public async Task<IEnumerable<Project>> GetByOwnerIdAsync(Guid ownerId) =>
         await _dbSet
+            .Include(p => p.Tasks)
             .Where(p => p.OwnerId == ownerId)
             .OrderByDescending(p => p.UpdatedAt)
             .ToListAsync();

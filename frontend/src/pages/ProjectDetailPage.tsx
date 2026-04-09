@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
 import Navbar from '../components/Navbar'
 import TaskDetailModal from '../components/TaskDetailModal'
+import ConfirmDialog from '../components/ConfirmDialog'
+import { useToast } from '../context/ToastContext'
 
 interface Task {
   id: string
@@ -51,6 +53,7 @@ const priorityClass: Record<string, string> = {
 const ProjectDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [project, setProject] = useState<Project | null>(null)
   const [tasks, setTasks] = useState<Task[]>([])
   const [paged, setPaged] = useState<Omit<PagedResult, 'items'> | null>(null)
@@ -63,9 +66,12 @@ const ProjectDetailPage: React.FC = () => {
   const [dueDate, setDueDate] = useState('')
   const [saving, setSaving] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
 
   useEffect(() => {
-    api.get<Project>(`/projects/${id}`).then(({ data }) => setProject(data))
+    api.get<Project>(`/projects/${id}`)
+      .then(({ data }) => setProject(data))
+      .catch(() => toast('Failed to load project', 'error'))
   }, [id])
 
   const fetchTasks = (p: number) => {
@@ -75,6 +81,7 @@ const ProjectDetailPage: React.FC = () => {
         setTasks(data.items)
         setPaged({ totalCount: data.totalCount, totalPages: data.totalPages, pageNumber: data.pageNumber })
       })
+      .catch(() => toast('Failed to load tasks', 'error'))
       .finally(() => setLoading(false))
   }
 
@@ -84,18 +91,16 @@ const ProjectDetailPage: React.FC = () => {
     e.preventDefault()
     setSaving(true)
     try {
-      await api.post(`/projects/${id}/tasks`, {
-        title,
-        description,
-        priority,
-        dueDate: dueDate || null,
-      })
+      await api.post(`/projects/${id}/tasks`, { title, description, priority, dueDate: dueDate || null })
       setTitle('')
       setDescription('')
       setPriority('Medium')
       setDueDate('')
       setShowForm(false)
       fetchTasks(1)
+      toast('Task created')
+    } catch {
+      toast('Failed to create task', 'error')
     } finally {
       setSaving(false)
     }
@@ -106,11 +111,17 @@ const ProjectDetailPage: React.FC = () => {
     if (selectedTask?.id === taskId) setSelectedTask(prev => prev ? { ...prev, status } : prev)
   }
 
-  const handleDeleteTask = async (taskId: string) => {
-    if (!confirm('Delete this task?')) return
-    await api.delete(`/projects/${id}/tasks/${taskId}`)
-    setSelectedTask(null)
-    fetchTasks(page)
+  const handleDeleteTask = async () => {
+    if (!deleteTarget) return
+    try {
+      await api.delete(`/projects/${id}/tasks/${deleteTarget}`)
+      setDeleteTarget(null)
+      setSelectedTask(null)
+      fetchTasks(page)
+      toast('Task deleted')
+    } catch {
+      toast('Failed to delete task', 'error')
+    }
   }
 
   return (
@@ -137,7 +148,7 @@ const ProjectDetailPage: React.FC = () => {
               <label>Task title</label>
               <input
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={e => setTitle(e.target.value)}
                 placeholder="e.g. Design landing page"
                 required
                 maxLength={300}
@@ -148,7 +159,7 @@ const ProjectDetailPage: React.FC = () => {
               <label>Description <span style={{ color: 'var(--text-subtle)', fontWeight: 400 }}>(optional)</span></label>
               <textarea
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={e => setDescription(e.target.value)}
                 placeholder="Add more detail about this task..."
                 rows={3}
                 maxLength={2000}
@@ -157,13 +168,13 @@ const ProjectDetailPage: React.FC = () => {
             <div className="form-row">
               <div className="form-group">
                 <label>Priority</label>
-                <select value={priority} onChange={(e) => setPriority(e.target.value)}>
-                  {PRIORITY_OPTIONS.map((p) => <option key={p}>{p}</option>)}
+                <select value={priority} onChange={e => setPriority(e.target.value)}>
+                  {PRIORITY_OPTIONS.map(p => <option key={p}>{p}</option>)}
                 </select>
               </div>
               <div className="form-group">
                 <label>Due Date</label>
-                <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required />
+                <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} required />
               </div>
             </div>
             <button type="submit" className="btn btn-primary" disabled={saving}>
@@ -188,7 +199,7 @@ const ProjectDetailPage: React.FC = () => {
               </p>
             )}
             <div className="task-list">
-              {tasks.map((t) => (
+              {tasks.map(t => (
                 <div
                   key={t.id}
                   className={`task-card priority-${priorityClass[t.priority] ?? 'medium'}`}
@@ -228,7 +239,17 @@ const ProjectDetailPage: React.FC = () => {
           projectId={id!}
           onClose={() => setSelectedTask(null)}
           onStatusChange={handleStatusChange}
-          onDelete={handleDeleteTask}
+          onDelete={taskId => setDeleteTarget(taskId)}
+        />
+      )}
+
+      {deleteTarget && (
+        <ConfirmDialog
+          message="Delete this task? This cannot be undone."
+          confirmLabel="Delete"
+          danger
+          onConfirm={handleDeleteTask}
+          onCancel={() => setDeleteTarget(null)}
         />
       )}
     </>
