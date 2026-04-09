@@ -32,6 +32,7 @@ public static class DependencyInjection
         services.AddScoped<IFileService, FileService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ICommentService, CommentService>();
+        services.AddScoped<ISearchService, SearchService>();
 
         return services;
     }

@@ -1,6 +1,7 @@
 import React from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import GlobalSearch from './GlobalSearch'
 
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth()
@@ -24,6 +25,7 @@ const Navbar: React.FC = () => {
           Files
         </NavLink>
       </div>
+      <GlobalSearch />
       <div className="navbar-user">
         <span className="user-email">{user?.email}</span>
         <span className="user-role">{user?.role}</span>
