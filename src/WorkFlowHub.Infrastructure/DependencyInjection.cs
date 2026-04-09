@@ -24,12 +24,14 @@ public static class DependencyInjection
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<ITaskRepository, TaskRepository>();
         services.AddScoped<IFileRepository, FileRepository>();
+        services.AddScoped<ICommentRepository, CommentRepository>();
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IProjectService, ProjectService>();
         services.AddScoped<ITaskService, TaskService>();
         services.AddScoped<IFileService, FileService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ICommentService, CommentService>();
 
         return services;
     }

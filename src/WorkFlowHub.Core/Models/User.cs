@@ -13,4 +13,5 @@ public class User
     public ICollection<Project> Projects { get; set; } = new List<Project>();
     public ICollection<TaskItem> AssignedTasks { get; set; } = new List<TaskItem>();
     public ICollection<FileRecord> FileRecords { get; set; } = new List<FileRecord>();
+    public ICollection<TaskComment> Comments { get; set; } = new List<TaskComment>();
 }

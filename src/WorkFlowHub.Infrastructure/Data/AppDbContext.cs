@@ -11,6 +11,7 @@ public class AppDbContext : DbContext
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<TaskItem> Tasks => Set<TaskItem>();
     public DbSet<FileRecord> FileRecords => Set<FileRecord>();
+    public DbSet<TaskComment> Comments => Set<TaskComment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -54,6 +55,20 @@ public class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.NoAction)
                 .IsRequired(false);
             e.HasQueryFilter(t => !t.IsDeleted);
+        });
+
+        modelBuilder.Entity<TaskComment>(e =>
+        {
+            e.HasKey(c => c.Id);
+            e.Property(c => c.Body).HasMaxLength(2000).IsRequired();
+            e.HasOne(c => c.Task)
+                .WithMany(t => t.Comments)
+                .HasForeignKey(c => c.TaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(c => c.Author)
+                .WithMany(u => u.Comments)
+                .HasForeignKey(c => c.AuthorId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<FileRecord>(e =>

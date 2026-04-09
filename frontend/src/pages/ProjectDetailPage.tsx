@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
 import Navbar from '../components/Navbar'
+import TaskDetailModal from '../components/TaskDetailModal'
 
 interface Task {
   id: string
@@ -27,7 +28,6 @@ interface PagedResult {
   pageNumber: number
 }
 
-const STATUS_OPTIONS = ['Todo', 'InProgress', 'Done', 'Cancelled']
 const PRIORITY_OPTIONS = ['Low', 'Medium', 'High', 'Critical']
 
 const statusBadge: Record<string, string> = {
@@ -62,6 +62,7 @@ const ProjectDetailPage: React.FC = () => {
   const [priority, setPriority] = useState('Medium')
   const [dueDate, setDueDate] = useState('')
   const [saving, setSaving] = useState(false)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
 
   useEffect(() => {
     api.get<Project>(`/projects/${id}`).then(({ data }) => setProject(data))
@@ -100,14 +101,15 @@ const ProjectDetailPage: React.FC = () => {
     }
   }
 
-  const handleStatusChange = async (taskId: string, status: string) => {
-    await api.patch(`/projects/${id}/tasks/${taskId}/status`, { status })
-    fetchTasks(page)
+  const handleStatusChange = (taskId: string, status: string) => {
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status } : t))
+    if (selectedTask?.id === taskId) setSelectedTask(prev => prev ? { ...prev, status } : prev)
   }
 
   const handleDeleteTask = async (taskId: string) => {
     if (!confirm('Delete this task?')) return
     await api.delete(`/projects/${id}/tasks/${taskId}`)
+    setSelectedTask(null)
     fetchTasks(page)
   }
 
@@ -187,7 +189,12 @@ const ProjectDetailPage: React.FC = () => {
             )}
             <div className="task-list">
               {tasks.map((t) => (
-                <div key={t.id} className={`task-card priority-${priorityClass[t.priority] ?? 'medium'}`}>
+                <div
+                  key={t.id}
+                  className={`task-card priority-${priorityClass[t.priority] ?? 'medium'}`}
+                  onClick={() => setSelectedTask(t)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <div className="task-header">
                     <h4>{t.title}</h4>
                     <span className={`badge ${statusBadge[t.status] ?? 'badge-default'}`}>
@@ -199,16 +206,6 @@ const ProjectDetailPage: React.FC = () => {
                     <span className={`priority-badge ${priorityClass[t.priority] ?? 'medium'}`}>{t.priority}</span>
                     {t.dueDate && <span>Due {new Date(t.dueDate).toLocaleDateString()}</span>}
                     {t.assignedUserEmail && <span>Assigned: {t.assignedUserEmail}</span>}
-                  </div>
-                  <div className="card-actions">
-                    <select
-                      value={t.status}
-                      onChange={(e) => handleStatusChange(t.id, e.target.value)}
-                      className="select-sm"
-                    >
-                      {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{statusLabel[s] ?? s}</option>)}
-                    </select>
-                    <button className="btn btn-danger btn-sm" onClick={() => handleDeleteTask(t.id)}>Delete</button>
                   </div>
                 </div>
               ))}
@@ -224,6 +221,16 @@ const ProjectDetailPage: React.FC = () => {
           </>
         )}
       </main>
+
+      {selectedTask && (
+        <TaskDetailModal
+          task={selectedTask}
+          projectId={id!}
+          onClose={() => setSelectedTask(null)}
+          onStatusChange={handleStatusChange}
+          onDelete={handleDeleteTask}
+        />
+      )}
     </>
   )
 }

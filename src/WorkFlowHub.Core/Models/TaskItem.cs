@@ -17,4 +17,5 @@ public class TaskItem
     public DateTime? DueDate { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsDeleted { get; set; } = false;
+    public ICollection<TaskComment> Comments { get; set; } = new List<TaskComment>();
 }
