@@ -14,5 +14,6 @@ public class CreateTaskDto
 
     public TaskPriority Priority { get; set; } = TaskPriority.Medium;
     public Guid? AssignedUserId { get; set; }
-    public DateTime? DueDate { get; set; }
+    [Required]
+    public DateTime DueDate { get; set; }
 }

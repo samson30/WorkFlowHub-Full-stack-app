@@ -161,7 +161,7 @@ const ProjectDetailPage: React.FC = () => {
               </div>
               <div className="form-group">
                 <label>Due Date</label>
-                <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+                <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required />
               </div>
             </div>
             <button type="submit" className="btn btn-primary" disabled={saving}>
