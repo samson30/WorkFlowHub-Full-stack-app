@@ -139,14 +139,14 @@ const TaskDetailModal: React.FC<Props> = ({ task, projectId, onClose, onStatusCh
     if (existing) {
       try {
         await api.delete(`/projects/${projectId}/tasks/${task.id}/labels/${existing.id}`)
-        setLabels(prev => prev.filter(l => l.id !== existing.id))
+        setLabels(prev => prev.filter((l: Label) => l.id !== existing.id))
       } catch {
         toast('Failed to remove label', 'error')
       }
     } else {
       try {
         const { data } = await api.post<Label>(`/projects/${projectId}/tasks/${task.id}/labels`, preset)
-        setLabels(prev => [...prev, data])
+        setLabels((prev: Label[]) => [...prev, data])
       } catch {
         toast('Failed to add label', 'error')
       }
@@ -258,6 +258,34 @@ const TaskDetailModal: React.FC<Props> = ({ task, projectId, onClose, onStatusCh
               <div className="sidebar-section">
                 <p className="sidebar-label">Priority</p>
                 <span className={`priority-badge ${priorityClass[task.priority] ?? 'medium'}`}>{task.priority}</span>
+              </div>
+
+              <div className="sidebar-section">
+                <p className="sidebar-label">Labels</p>
+                <div className="label-chips">
+                  {labels.map((l: Label) => (
+                    <span
+                      key={l.id}
+                      className="label-chip"
+                      style={{ backgroundColor: l.color }}
+                    >
+                      {l.name}
+                      <button className="label-chip-remove" onClick={() => handleToggleLabel(l)}>×</button>
+                    </span>
+                  ))}
+                </div>
+                <div className="label-presets">
+                  {PRESET_LABELS.map(p => (
+                    <button
+                      key={p.name}
+                      className={`label-preset${labels.some((l: Label) => l.name === p.name) ? ' active' : ''}`}
+                      style={{ '--label-color': p.color } as React.CSSProperties}
+                      onClick={() => handleToggleLabel(p)}
+                    >
+                      {p.name}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="sidebar-section">

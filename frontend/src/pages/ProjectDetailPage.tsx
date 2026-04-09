@@ -7,6 +7,12 @@ import ConfirmDialog from '../components/ConfirmDialog'
 import KanbanBoard from '../components/KanbanBoard'
 import { useToast } from '../context/ToastContext'
 
+interface Label {
+  id: string
+  name: string
+  color: string
+}
+
 interface Task {
   id: string
   title: string
@@ -16,6 +22,7 @@ interface Task {
   assignedUserEmail: string | null
   dueDate: string | null
   createdAt: string
+  labels: Label[]
 }
 
 interface Project {
@@ -235,6 +242,9 @@ const ProjectDetailPage: React.FC = () => {
                     <span className={`priority-badge ${priorityClass[t.priority] ?? 'medium'}`}>{t.priority}</span>
                     {t.dueDate && <span>Due {new Date(t.dueDate).toLocaleDateString()}</span>}
                     {t.assignedUserEmail && <span>Assigned: {t.assignedUserEmail}</span>}
+                    {t.labels?.map((l: Label) => (
+                      <span key={l.id} className="label-chip label-chip-sm" style={{ backgroundColor: l.color }}>{l.name}</span>
+                    ))}
                   </div>
                 </div>
               ))}
