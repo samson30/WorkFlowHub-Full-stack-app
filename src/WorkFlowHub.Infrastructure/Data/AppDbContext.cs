@@ -12,6 +12,7 @@ public class AppDbContext : DbContext
     public DbSet<TaskItem> Tasks => Set<TaskItem>();
     public DbSet<FileRecord> FileRecords => Set<FileRecord>();
     public DbSet<TaskComment> Comments => Set<TaskComment>();
+    public DbSet<TaskLabel> Labels => Set<TaskLabel>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -69,6 +70,17 @@ public class AppDbContext : DbContext
                 .WithMany(u => u.Comments)
                 .HasForeignKey(c => c.AuthorId)
                 .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        modelBuilder.Entity<TaskLabel>(e =>
+        {
+            e.HasKey(l => l.Id);
+            e.Property(l => l.Name).HasMaxLength(50).IsRequired();
+            e.Property(l => l.Color).HasMaxLength(20).IsRequired();
+            e.HasOne(l => l.Task)
+                .WithMany(t => t.Labels)
+                .HasForeignKey(l => l.TaskId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<FileRecord>(e =>

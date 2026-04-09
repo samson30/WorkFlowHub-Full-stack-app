@@ -76,4 +76,22 @@ public class TasksController : ControllerBase
         await _taskService.DeleteTaskAsync(projectId, taskId, CurrentUserId);
         return NoContent();
     }
+
+    [HttpPost("{taskId:guid}/labels")]
+    [ProducesResponseType(typeof(LabelDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> AddLabel(Guid projectId, Guid taskId, [FromBody] CreateLabelDto dto)
+    {
+        var label = await _taskService.AddLabelAsync(projectId, taskId, dto, CurrentUserId);
+        return StatusCode(StatusCodes.Status201Created, label);
+    }
+
+    [HttpDelete("{taskId:guid}/labels/{labelId:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RemoveLabel(Guid projectId, Guid taskId, Guid labelId)
+    {
+        await _taskService.RemoveLabelAsync(projectId, taskId, labelId, CurrentUserId);
+        return NoContent();
+    }
 }

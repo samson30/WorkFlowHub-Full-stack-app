@@ -11,4 +11,6 @@ public interface ITaskService
     Task<TaskResponseDto> UpdateTaskAsync(Guid projectId, Guid taskId, UpdateTaskDto dto, Guid userId);
     Task<TaskResponseDto> UpdateTaskStatusAsync(Guid projectId, Guid taskId, UpdateStatusDto dto, Guid userId);
     Task DeleteTaskAsync(Guid projectId, Guid taskId, Guid userId);
+    Task<LabelDto> AddLabelAsync(Guid projectId, Guid taskId, CreateLabelDto dto, Guid userId);
+    Task RemoveLabelAsync(Guid projectId, Guid taskId, Guid labelId, Guid userId);
 }

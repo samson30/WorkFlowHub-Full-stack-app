@@ -4,6 +4,7 @@ import api from '../api/axios'
 import Navbar from '../components/Navbar'
 import TaskDetailModal from '../components/TaskDetailModal'
 import ConfirmDialog from '../components/ConfirmDialog'
+import KanbanBoard from '../components/KanbanBoard'
 import { useToast } from '../context/ToastContext'
 
 interface Task {
@@ -67,6 +68,7 @@ const ProjectDetailPage: React.FC = () => {
   const [saving, setSaving] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<'list' | 'board'>('list')
 
   useEffect(() => {
     api.get<Project>(`/projects/${id}`)
@@ -136,9 +138,23 @@ const ProjectDetailPage: React.FC = () => {
             <h2>{project?.name ?? 'Loading...'}</h2>
             {project?.description && <p className="text-muted" style={{ marginTop: 4 }}>{project.description}</p>}
           </div>
-          <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-            {showForm ? '✕ Cancel' : '+ New Task'}
-          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <div className="view-toggle">
+              <button
+                className={`view-toggle-btn${viewMode === 'list' ? ' active' : ''}`}
+                onClick={() => setViewMode('list')}
+                title="List view"
+              >☰ List</button>
+              <button
+                className={`view-toggle-btn${viewMode === 'board' ? ' active' : ''}`}
+                onClick={() => setViewMode('board')}
+                title="Board view"
+              >⬛ Board</button>
+            </div>
+            <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
+              {showForm ? '✕ Cancel' : '+ New Task'}
+            </button>
+          </div>
         </div>
 
         {showForm && (
@@ -191,6 +207,8 @@ const ProjectDetailPage: React.FC = () => {
             <p>No tasks yet</p>
             <small>Click "New Task" to add the first task to this project</small>
           </div>
+        ) : viewMode === 'board' ? (
+          <KanbanBoard tasks={tasks} onTaskClick={setSelectedTask} />
         ) : (
           <>
             {paged && (

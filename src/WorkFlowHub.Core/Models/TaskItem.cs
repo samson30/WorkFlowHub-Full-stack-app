@@ -18,4 +18,5 @@ public class TaskItem
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsDeleted { get; set; } = false;
     public ICollection<TaskComment> Comments { get; set; } = new List<TaskComment>();
+    public ICollection<TaskLabel> Labels { get; set; } = new List<TaskLabel>();
 }

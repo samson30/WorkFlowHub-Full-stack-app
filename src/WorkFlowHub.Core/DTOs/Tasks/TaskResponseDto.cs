@@ -15,4 +15,5 @@ public class TaskResponseDto
     public string? AssignedUserEmail { get; set; }
     public DateTime? DueDate { get; set; }
     public DateTime CreatedAt { get; set; }
+    public List<LabelDto> Labels { get; set; } = new();
 }

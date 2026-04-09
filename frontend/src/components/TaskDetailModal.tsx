@@ -4,6 +4,12 @@ import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import ConfirmDialog from './ConfirmDialog'
 
+interface Label {
+  id: string
+  name: string
+  color: string
+}
+
 interface Task {
   id: string
   title: string
@@ -13,6 +19,7 @@ interface Task {
   assignedUserEmail: string | null
   dueDate: string | null
   createdAt: string
+  labels: Label[]
 }
 
 interface Comment {
@@ -50,6 +57,15 @@ const priorityClass: Record<string, string> = {
   Critical: 'critical',
 }
 
+const PRESET_LABELS = [
+  { name: 'Bug', color: '#ef4444' },
+  { name: 'Feature', color: '#8b5cf6' },
+  { name: 'Design', color: '#ec4899' },
+  { name: 'Blocker', color: '#f97316' },
+  { name: 'Enhancement', color: '#3b82f6' },
+  { name: 'Docs', color: '#10b981' },
+]
+
 const TaskDetailModal: React.FC<Props> = ({ task, projectId, onClose, onStatusChange, onDelete }) => {
   const { user } = useAuth()
   const { toast } = useToast()
@@ -59,6 +75,7 @@ const TaskDetailModal: React.FC<Props> = ({ task, projectId, onClose, onStatusCh
   const [submitting, setSubmitting] = useState(false)
   const [currentStatus, setCurrentStatus] = useState(task.status)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [labels, setLabels] = useState<Label[]>(task.labels ?? [])
   const backdropRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -114,6 +131,25 @@ const TaskDetailModal: React.FC<Props> = ({ task, projectId, onClose, onStatusCh
       toast('Comment deleted')
     } catch {
       toast('Failed to delete comment', 'error')
+    }
+  }
+
+  const handleToggleLabel = async (preset: { name: string; color: string }) => {
+    const existing = labels.find(l => l.name === preset.name)
+    if (existing) {
+      try {
+        await api.delete(`/projects/${projectId}/tasks/${task.id}/labels/${existing.id}`)
+        setLabels(prev => prev.filter(l => l.id !== existing.id))
+      } catch {
+        toast('Failed to remove label', 'error')
+      }
+    } else {
+      try {
+        const { data } = await api.post<Label>(`/projects/${projectId}/tasks/${task.id}/labels`, preset)
+        setLabels(prev => [...prev, data])
+      } catch {
+        toast('Failed to add label', 'error')
+      }
     }
   }
 

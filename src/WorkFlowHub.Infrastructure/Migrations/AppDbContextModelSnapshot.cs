@@ -86,6 +86,32 @@ namespace WorkFlowHub.Infrastructure.Migrations
                     b.ToTable("Projects");
                 });
 
+            modelBuilder.Entity("WorkFlowHub.Core.Models.TaskLabel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid>("TaskId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TaskId");
+
+                    b.ToTable("Labels");
+                });
+
             modelBuilder.Entity("WorkFlowHub.Core.Models.TaskComment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -257,9 +283,22 @@ namespace WorkFlowHub.Infrastructure.Migrations
                     b.Navigation("Tasks");
                 });
 
+            modelBuilder.Entity("WorkFlowHub.Core.Models.TaskLabel", b =>
+                {
+                    b.HasOne("WorkFlowHub.Core.Models.TaskItem", "Task")
+                        .WithMany("Labels")
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Task");
+                });
+
             modelBuilder.Entity("WorkFlowHub.Core.Models.TaskItem", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("Labels");
                 });
 
             modelBuilder.Entity("WorkFlowHub.Core.Models.User", b =>

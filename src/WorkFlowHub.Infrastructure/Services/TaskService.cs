@@ -128,6 +128,41 @@ public class TaskService : ITaskService
             throw new UnauthorizedAccessException("You do not own this project.");
     }
 
+    public async Task<LabelDto> AddLabelAsync(Guid projectId, Guid taskId, CreateLabelDto dto, Guid userId)
+    {
+        await EnsureProjectOwnershipAsync(projectId, userId);
+
+        var task = await _taskRepository.GetByIdAsync(taskId)
+            ?? throw new KeyNotFoundException("Task not found.");
+
+        if (task.ProjectId != projectId)
+            throw new KeyNotFoundException("Task not found.");
+
+        var label = new TaskLabel
+        {
+            TaskId = taskId,
+            Name = dto.Name,
+            Color = dto.Color
+        };
+
+        await _taskRepository.AddLabelAsync(label);
+
+        return new LabelDto { Id = label.Id, Name = label.Name, Color = label.Color };
+    }
+
+    public async Task RemoveLabelAsync(Guid projectId, Guid taskId, Guid labelId, Guid userId)
+    {
+        await EnsureProjectOwnershipAsync(projectId, userId);
+
+        var label = await _taskRepository.GetLabelAsync(labelId)
+            ?? throw new KeyNotFoundException("Label not found.");
+
+        if (label.TaskId != taskId)
+            throw new KeyNotFoundException("Label not found.");
+
+        await _taskRepository.RemoveLabelAsync(label);
+    }
+
     private static TaskResponseDto MapToDto(TaskItem t) => new()
     {
         Id = t.Id,
@@ -139,6 +174,7 @@ public class TaskService : ITaskService
         AssignedUserId = t.AssignedUserId,
         AssignedUserEmail = t.AssignedUser?.Email,
         DueDate = t.DueDate,
-        CreatedAt = t.CreatedAt
+        CreatedAt = t.CreatedAt,
+        Labels = t.Labels.Select(l => new LabelDto { Id = l.Id, Name = l.Name, Color = l.Color }).ToList()
     };
 }
